@@ -2,7 +2,7 @@ RSpec.describe WpApiClient::Relationship do
   describe "relationships with terms", vcr: {cassette_name: 'single_post'} do
     before :each do
       post = @api.get("posts/1")
-      @relationship = WpApiClient::Relationship.new(post.resource, "https://api.w.org/term")
+      @relationship = WpApiClient::Relationship.new(post.resource, "https://api.w.org/term", @api)
     end
 
     it "presents term objects as a set of key/value collections" do
@@ -15,7 +15,7 @@ RSpec.describe WpApiClient::Relationship do
   describe "relationships with posts", vcr: {cassette_name: 'single_term'} do
     before :each do
       term = @api.get("categories/1")
-      @relationship = WpApiClient::Relationship.new(term.resource, "http://api.w.org/v2/post_type")
+      @relationship = WpApiClient::Relationship.new(term.resource, "http://api.w.org/v2/post_type", @api)
     end
 
     it "returns an collection of posts" do
@@ -28,7 +28,7 @@ RSpec.describe WpApiClient::Relationship do
   describe "relationships with featured images", vcr: {cassette_name: 'single_post'} do
     before :each do
       term = @api.get("posts/1")
-      @relationship = WpApiClient::Relationship.new(term.resource, "https://api.w.org/featuredmedia")
+      @relationship = WpApiClient::Relationship.new(term.resource, "https://api.w.org/featuredmedia", @api)
     end
 
     it "returns an collection of posts" do
@@ -41,14 +41,13 @@ RSpec.describe WpApiClient::Relationship do
   describe "relationships with metadata", vcr: {cassette_name: 'single_post_auth', record: :new_episodes} do
     before :each do
       # we need oAuth for this
-      WpApiClient.reset!
       oauth_credentials = get_test_oauth_credentials
-      WpApiClient.configure do |api_client|
+      @api.configure do |api_client|
         api_client.oauth_credentials = oauth_credentials
       end
-      @api = WpApiClient.get_client
+
       post = @api.get("posts/1")
-      @relationship = WpApiClient::Relationship.new(post.resource, "https://api.w.org/meta")
+      @relationship = WpApiClient::Relationship.new(post.resource, "https://api.w.org/meta", @api)
     end
 
     it "returns an hash of meta" do

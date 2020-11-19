@@ -9,10 +9,10 @@ It can make concurrent requests.
 It does not support update or create actions. Or comments.
 
 It requires **Ruby 2.3** and is tested against the following WordPress
-versions. 
+versions.
 
-- 4.4 
-- 4.5 (WP-API 2.0b12) 
+- 4.4
+- 4.5 (WP-API 2.0b12)
 - 4.5.3 (WP-API 2.0b13)
 - 4.7
 - 4.7.2
@@ -39,11 +39,9 @@ require 'wp_api_client'
 ```ruby
 # create a client
 
-WpApiClient.configure do |api_client|
+@api = WpApiClient.new do |api_client|
   api_client.endpoint = 'http://example.com/wp-json/wp/v2'
 end
-
-@api = WpApiClient.get_client
 
 # get some posts
 posts = @api.get('custom_post_type/') # or "posts/" etc
@@ -128,14 +126,14 @@ defined through meta and exposed in the REST API like this:
 
 ```php
 add_filter( 'rest_prepare_king', function( $data, $king ) {
-	if( $king->queen ) {
-		$data->add_link(
-			'http://api.myuniqueuri.com/marriage',
-			rest_url( '/wp/v2/person/'.$king->queen ),
-			['embeddable' => true]
-		);
-	}
-	return $data;
+  if( $king->queen ) {
+    $data->add_link(
+      'http://api.myuniqueuri.com/marriage',
+      rest_url( '/wp/v2/person/'.$king->queen ),
+      ['embeddable' => true]
+    );
+  }
+  return $data;
 }, 10, 2);
 ```
 
@@ -153,7 +151,7 @@ queen = king.relations("http://api.myuniqueuri.com/marriage").first
 The solution is to register the relationship on configuration:
 
 ```ruby
-WpApiClient.configure do |c|
+@api.configure do |c|
   c.define_mapping("http://api.myuniqueuri.com/marriage", :post)
 end
 
@@ -181,11 +179,10 @@ posts = term.posts
 Provide a symbol-keyed hash of `token`, `token_secret`, `consumer_key` and `consumer_secret` on configuration.
 
 ```ruby
-WpApiClient.configure do |api_client|
+client = WpApiClient.new do |api_client|
   api_client.oauth_credentials = oauth_credentials_hash
 end
 
-client = WpApiClient.get_client
 ```
 
 #### Basic Auth
@@ -193,11 +190,10 @@ client = WpApiClient.get_client
 Provide a symbol-keyed hash of `username` and `password` on configuration.
 
 ```ruby
-WpApiClient.configure do |api_client|
+client = WpApiClient.new do |api_client|
   api_client.basic_auth = {username: 'miles', password: 'smile'}
 end
 
-client = WpApiClient.get_client
 ```
 
 ## Concurrency

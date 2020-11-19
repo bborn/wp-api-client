@@ -8,12 +8,15 @@ module WpApiClient
   class Connection
 
     attr_accessor :headers
-    attr_reader :concurrent
+    attr_reader :concurrent, :configuration
 
     def initialize(configuration)
       @configuration = configuration
       @queue = []
-      @conn = Faraday.new(url: configuration.endpoint) do |faraday|
+    end
+
+    def conn
+      Faraday.new(url: configuration.endpoint) do |faraday|
 
         if configuration.oauth2_token
           faraday.use FaradayMiddleware::OAuth2, configuration.oauth2_token, token_type: :bearer
@@ -43,22 +46,26 @@ module WpApiClient
         faraday.use Faraday::Response::RaiseError
         faraday.response :json, :content_type => /\bjson$/
         faraday.adapter  :typhoeus
-      end
+      end      
     end
 
     # translate requests into wp-api urls
     def get(url, params = {})
-      @conn.get url, parse_params(params)
+      conn.get url, parse_params(params)
     end
 
     def post(url, params = {})
-      @conn.post url, params
+      conn.post url, params
     end
+
+    def delete(url, params = {})
+      conn.delete url, params
+    end    
 
     # requests come in as url/params pairs
     def get_concurrently(requests)
       responses = []
-      @conn.in_parallel do
+      conn.in_parallel do
         requests.map do |r|
           responses << get(r[0], r[1])
         end

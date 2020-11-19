@@ -28,7 +28,7 @@ RSpec.describe WpApiClient::Collection do
       expect(single_post).not_to be_an Array
 
       expect {
-        WpApiClient::Collection.new(single_post.resource)
+        WpApiClient::Collection.new(single_post.resource, @api)
       }.not_to raise_error
     end
 
@@ -40,7 +40,7 @@ RSpec.describe WpApiClient::Collection do
 
     it "throws an error when it tries to parse an error response" do
       expect {
-        WpApiClient::Collection.new([{"code"=>"rest_forbidden", "message"=>"You don't have permission to do this.", "data"=>{"status"=>403}}])
+        WpApiClient::Collection.new([{"code"=>"rest_forbidden", "message"=>"You don't have permission to do this.", "data"=>{"status"=>403}}], @api)
       }.to raise_error
     end
   end

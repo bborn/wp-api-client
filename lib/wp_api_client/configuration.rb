@@ -26,9 +26,10 @@ module WpApiClient
     attr_accessor :basic_auth
     attr_accessor :proxy
 
-    def initialize
-      @endpoint = 'http://localhost:8080/wp-json/wp/v2'
+    def initialize(&block)
+      @endpoint = nil #'http://localhost:8080/wp-json/wp/v2'
       @embed = true
+      yield(self) if block_given?
     end
 
     def define_mapping(relation, type)

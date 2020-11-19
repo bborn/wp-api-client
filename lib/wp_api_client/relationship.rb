@@ -62,7 +62,7 @@ module WpApiClient
 
       def meta(r)
         relations = {}
-        meta = WpApiClient.get_client.get(r.resource["_links"][r.relation].first["href"])
+        meta = r.client.get(r.resource["_links"][r.relation].first["href"])
         meta.map do |m|
           relations.merge! Hash[m.key, m.value]
         end
@@ -72,13 +72,15 @@ module WpApiClient
 
     attr_reader :resource
     attr_reader :relation
+    attr_reader :client
 
-    def initialize(resource, relation)
+    def initialize(resource, relation, client)
       if resource["_links"].keys.include? 'curies'
         relation = convert_uri_to_curie(relation)
       end
       @resource = resource
       @relation = relation
+      @client = client
     end
 
     def get_relations
@@ -110,7 +112,7 @@ Available mappings are :post, :term, and :meta.}
       if objects = @resource.dig("_embedded", relationship)
         location = position ? objects[position] : objects
         begin
-          WpApiClient::Collection.new(location)
+          WpApiClient::Collection.new(location, client)
         rescue WpApiClient::ErrorResponse
           load_from_links(relationship, position)
         end
@@ -126,13 +128,13 @@ Available mappings are :post, :term, and :meta.}
         if @resource["_links"][relationship].is_a? Array
           # If the resources are linked severally, crank through and
           # retrieve them one by one as an array
-          return @resource["_links"][relationship].map { |link| WpApiClient.get_client.get(link["href"]) }
+          return @resource["_links"][relationship].map { |link| client.get(link["href"]) }
         else
           # Otherwise, get the single link to the lot
           location = @resource["_links"][relationship]["href"]
         end
       end
-      WpApiClient.get_client.get(location) if location
+      client.get(location) if location
     end
 
     def convert_uri_to_curie(uri)

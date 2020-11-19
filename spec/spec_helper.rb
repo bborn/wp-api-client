@@ -34,14 +34,9 @@ end
 RSpec.configure do |config|
 
   config.before(:each) do
-    WpApiClient.configure do |api_client|
+    @api = WpApiClient.new do |api_client|
       api_client.endpoint = 'http://localhost:8080/wp-json/wp/v2'
     end
-    @api = WpApiClient.get_client
-  end
-
-  config.after(:each) do
-    WpApiClient.reset
   end
 
   # rspec-expectations config goes here. You can use an alternate

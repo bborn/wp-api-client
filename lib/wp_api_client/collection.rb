@@ -2,11 +2,11 @@ module WpApiClient
   class Collection
     include Enumerable
 
-    attr_accessor :resources, :total_available
+    attr_accessor :resources, :total_available, :client
 
-    def initialize(resources, headers = nil)
+    def initialize(resources, headers = nil, client)
       resources = [resources] unless resources.is_a? Array
-      @resources = resources.map { |object| WpApiClient::Entities::Base.build(object) }
+      @resources = resources.map { |object| WpApiClient::Entities::Base.build(object, client) }
       if headers
         @links = parse_link_header(headers['Link'])
         @total_available = headers['X-WP-TOTAL'].to_i

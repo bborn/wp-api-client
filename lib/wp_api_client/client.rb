@@ -5,6 +5,14 @@ module WpApiClient
       @connection = connection
     end
 
+    def configure(&block)
+      yield(@connection.configuration)
+    end
+
+    def connection
+      @connection
+    end
+
     def get(url, params = {})
       if @concurrent_client
         @concurrent_client.get(api_path_from(url), params)
@@ -25,8 +33,20 @@ module WpApiClient
       end
     end
 
+    def delete(url, params = {})
+      if @concurrent_client
+        @concurrent_client.delete(api_path_from(url), params)
+      else
+        response = @connection.delete(api_path_from(url), params)
+        @headers = response.headers
+        if response.body["deleted"] == true
+          native_representation_of response.body["previous"]
+        end
+      end
+    end    
+
     def concurrently
-      @concurrent_client ||= ConcurrentClient.new(@connection)
+      @concurrent_client = ConcurrentClient.new(@connection)
       yield @concurrent_client
       result = @concurrent_client.run
       @concurrent_client = nil
@@ -43,9 +63,9 @@ module WpApiClient
     def native_representation_of(response_body)
       # Do we have a collection of objects?
       if response_body.is_a? Array
-        WpApiClient::Collection.new(response_body, @headers)
+        WpApiClient::Collection.new(response_body, @headers, self)
       else
-        WpApiClient::Entities::Base.build(response_body)
+        WpApiClient::Entities::Base.build(response_body, self)
       end
     end
   end

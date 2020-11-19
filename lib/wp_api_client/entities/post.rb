@@ -4,7 +4,7 @@ module WpApiClient
       alias :post :resource
 
       def self.represents?(json)
-        json.dig("_links", "about") and json["_links"]["about"].first["href"] =~ /wp\/v2\/types/
+        (json.dig("type") and json.dig("type") == "post") || (json.dig("_links", "about") and json["_links"]["about"].first["href"] =~ /wp\/v2\/types/)
       end
 
       def title
